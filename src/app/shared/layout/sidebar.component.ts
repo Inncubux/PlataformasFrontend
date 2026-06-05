@@ -1,82 +1,140 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NzIconModule],
   template: `
-    <aside class="sidebar-container">
+    <aside class="sidebar-dark">
       
-      <div class="side-card top-card">
-        <h3 class="brand-title">PYME SP</h3>
-        <h2 class="brand-subtitle">Sistema de Remuneraciones</h2>
-        <p class="brand-caption">Navegación principal para las pantallas de la plataforma.</p>
+      <div class="brand-zone">
+        <div class="logo-box">SP</div>
+        <div class="brand-text">
+          <h2 class="brand-title">PYME SP</h2>
+          <p class="brand-subtitle">Remuneraciones</p>
+        </div>
       </div>
 
-      <nav class="side-card menu-card">
-        <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">Dashboard</a>
-        <a routerLink="/empresa" routerLinkActive="active" class="menu-item">Gestión de Empresa</a>
-        <a routerLink="/empleados" routerLinkActive="active" class="menu-item">Empleados</a>
-        <a routerLink="/liquidaciones" routerLinkActive="active" class="menu-item">Liquidaciones</a>
-        <a routerLink="/vacaciones" routerLinkActive="active" class="menu-item">Vacaciones y Permisos</a>
-        <a routerLink="/documentos" routerLinkActive="active" class="menu-item">Documentos y Firmas</a>
+      <nav class="nav-menu">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+          <span nz-icon nzType="appstore" nzTheme="outline"></span> Dashboard
+        </a>
+        <a routerLink="/empresa" routerLinkActive="active" class="nav-item">
+          <span nz-icon nzType="shop" nzTheme="outline"></span> Gestión de Empresa
+        </a>
+        <a routerLink="/empleados" routerLinkActive="active" class="nav-item">
+          <span nz-icon nzType="team" nzTheme="outline"></span> Empleados
+        </a>
+        <a routerLink="/liquidaciones" routerLinkActive="active" class="nav-item">
+          <span nz-icon nzType="file-text" nzTheme="outline"></span> Liquidaciones
+        </a>
+        <a routerLink="/vacaciones" routerLinkActive="active" class="nav-item">
+          <span nz-icon nzType="calendar" nzTheme="outline"></span> Vacaciones y Permisos
+        </a>
+        <a routerLink="/documentos" routerLinkActive="active" class="nav-item">
+          <span nz-icon nzType="folder" nzTheme="outline"></span> Documentos y Firmas
+        </a>
       </nav>
 
-      <div class="side-card bottom-card">
-        <p class="status-title">ESTADO</p>
-        <div class="status-indicator">
-          <span class="dot green"></span> Formulario activo
+      <div class="sidebar-footer">
+        <div class="status-box">
+          <span class="dot"></span>
+          <span>Sistema en línea</span>
         </div>
-        <p class="status-caption">Diseño responsive</p>
       </div>
 
     </aside>
   `,
   styles: [`
-    .sidebar-container {
-      width: 280px;
+    .sidebar-dark {
+      width: 260px;
+      background-color: #0f172a; /* Azul oscuro elegante */
+      color: #cbd5e1;
       display: flex;
       flex-direction: column;
-      gap: 16px;
       height: 100%;
+      border-right: 1px solid #1e293b;
+      flex-shrink: 0;
     }
 
-    .side-card {
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    /* Zona de Marca */
+    .brand-zone {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #1e293b;
     }
 
-    /* Tarjeta Superior */
-    .top-card { padding: 24px 20px; }
-    .brand-title { color: #1e3a8a; font-size: 0.85rem; font-weight: 800; margin: 0 0 6px 0; letter-spacing: 1px; }
-    .brand-subtitle { font-size: 1.1rem; color: #1e293b; font-weight: 600; margin: 0 0 10px 0; }
-    .brand-caption { font-size: 0.8rem; color: #64748b; line-height: 1.4; margin: 0; }
+    .logo-box {
+      width: 40px;
+      height: 40px;
+      background: #2563eb;
+      color: white;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
 
-    /* Tarjeta Menú */
-    .menu-card { padding: 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
-    .menu-item {
+    .brand-title { color: #ffffff; margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; }
+    .brand-subtitle { margin: 0; font-size: 0.75rem; color: #94a3b8; }
+
+    /* Navegación */
+    .nav-menu {
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: #94a3b8;
       text-decoration: none;
-      color: #0f172a;
-      font-weight: 700;
-      font-size: 0.95rem;
-      padding: 16px 20px;
-      border-radius: 14px;
-      transition: background-color 0.2s;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      transition: all 0.2s;
     }
-    .menu-item:hover { background-color: #f8fafc; }
-    /* El estilo de la pestaña seleccionada según tu imagen */
-    .menu-item.active { background-color: #f8fafc; } 
 
-    /* Tarjeta Inferior */
-    .bottom-card { padding: 20px; margin-top: auto; }
-    .status-title { color: #1d4ed8; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; margin: 0 0 12px 0; }
-    .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; color: #1e293b; margin-bottom: 6px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot.green { background-color: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2); }
-    .status-caption { font-size: 0.85rem; color: #64748b; margin: 0; }
+    .nav-item span { font-size: 1.1rem; }
+
+    .nav-item:hover {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+
+    /* Estado Activo (Pestaña seleccionada) */
+    .nav-item.active {
+      background-color: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Footer del Sidebar */
+    .sidebar-footer { padding: 24px; border-top: 1px solid #1e293b; }
+    .status-box {
+      background: #1e293b;
+      padding: 10px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+    .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
   `]
 })
 export class AppSidebarComponent {}
