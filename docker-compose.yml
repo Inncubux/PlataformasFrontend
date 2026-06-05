@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # 1. SERVIDOR FRONTEND (Angular)
+  frontend:
+    build:
+      context: ./PlataformasFrontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - pyme_network
+    depends_on:
+      - backend
+
+  # 2. SERVIDOR BACKEND (.NET)
+  backend:
+    build:
+      context: ./PlataformasBackend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      # Cadena de conexión apuntando al contenedor de PostgreSQL
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=pymesp_db;Username=postgres;Password=admin_pymesp
+    networks:
+      - pyme_network
+    depends_on:
+      - db # Espera a que la base de datos esté lista antes de arrancar
+
+  # 3. SERVIDOR DE BASE DE DATOS (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin_pymesp
+      - POSTGRES_DB=pymesp_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pyme_network
+
+# RED VIRTUAL CERRADA
+networks:
+  pyme_network:
+    driver: bridge
+
+# ALMACENAMIENTO PERSISTENTE
+volumes:
+  postgres_data:
