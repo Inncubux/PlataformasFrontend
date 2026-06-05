@@ -1,0 +1,77 @@
+.empresa-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.empresa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.empresa-header h2,
+.profile-header h3 {
+  margin: 0;
+}
+
+.empresa-header p,
+.profile-header p {
+  margin: 4px 0 0;
+  color: #6b7280;
+}
+
+.save-button {
+  min-width: 180px;
+  justify-content: center;
+}
+
+.button-icon {
+  font-size: 16px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #f0f5ff;
+  color: #2f54eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.section-icon {
+  font-size: 28px;
+}
+
+.upload-icon {
+  font-size: 24px;
+  color: #2f54eb;
+}
+
+@media (max-width: 768px) {
+  .empresa-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .save-button {
+    width: 100%;
+  }
+
+  .profile-header {
+    align-items: flex-start;
+  }
+}

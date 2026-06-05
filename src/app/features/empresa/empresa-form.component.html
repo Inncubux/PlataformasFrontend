@@ -1,0 +1,170 @@
+<div class="empresa-page">
+  <header class="empresa-header">
+    <div>
+      <h2>Gestión de Empresa</h2>
+      <p>Configuración general y parámetros legales</p>
+    </div>
+
+    <button nz-button nzType="primary" class="save-button" (click)="guardarCambios()">
+      <span nz-icon nzType="save" class="button-icon"></span>
+      <span>Guardar Cambios</span>
+    </button>
+  </header>
+
+  <section aria-label="Datos de Empresa">
+    <nz-card class="empresa-card">
+      <div class="profile-header">
+        <div class="profile-icon">
+          <span nz-icon nzType="shop" class="section-icon"></span>
+        </div>
+
+        <div>
+          <h3>Perfil de Empresa</h3>
+          <p>Información legal y datos corporativos</p>
+        </div>
+      </div>
+
+      <form nz-form [formGroup]="empresaForm" nzLayout="vertical" class="empresa-form">
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>RUT Empresa</nz-form-label>
+              <nz-form-control nzErrorTip="Ingrese un RUT válido">
+                <input nz-input formControlName="rutEmpresa" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Razón Social</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <input nz-input formControlName="razonSocial" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Giro</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <input nz-input formControlName="giro" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Código Actividad Económica SII</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <input nz-input formControlName="codigoSii" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row>
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label nzRequired>Dirección</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <input nz-input formControlName="direccion" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Comuna</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <nz-select formControlName="comuna">
+                  <nz-option nzValue="Providencia" nzLabel="Providencia"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Región</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <nz-select formControlName="region">
+                  <nz-option nzValue="Metropolitana" nzLabel="Metropolitana"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Representante Legal - Nombre</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <input nz-input formControlName="repLegalNombre" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Representante Legal - RUT</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <input nz-input formControlName="repLegalRut" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Mutual de Seguridad</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <nz-select formControlName="mutual">
+                  <nz-option nzValue="ACHS" nzLabel="ACHS"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzXs]="24" [nzMd]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Caja de Compensación (CCAF)</nz-form-label>
+              <nz-form-control nzErrorTip="Requerido">
+                <nz-select formControlName="ccaf">
+                  <nz-option nzValue="Los Andes" nzLabel="Los Andes"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row>
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label>Logo de la Empresa</nz-form-label>
+              <nz-form-control>
+                <nz-upload
+                  nzType="drag"
+                  nzMultiple="false"
+                  nzAction="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                >
+                  <p class="ant-upload-drag-icon">
+                    <span nz-icon nzType="inbox" class="upload-icon"></span>
+                  </p>
+                  <p class="ant-upload-text">Haz clic para subir o arrastra una imagen aquí</p>
+                  <p class="ant-upload-hint">PNG, JPG o SVG (máx. 2MB)</p>
+                </nz-upload>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </form>
+    </nz-card>
+  </section>
+</div>
