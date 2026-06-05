@@ -1,51 +1,93 @@
+:host {
+  display: block;
+}
+
 .empresa-page {
   max-width: 1120px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
+/* --- CABECERA PRINCIPAL --- */
 .empresa-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 8px;
 }
 
-.empresa-header h2,
-.profile-header h3 {
+.header-text h2 {
   margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
 }
 
-.empresa-header p,
-.profile-header p {
+.header-text p {
   margin: 4px 0 0;
-  color: #6b7280;
+  color: #64748b;
+  font-size: 0.95rem;
 }
 
+/* Botón Guardar Cambios */
 .save-button {
-  min-width: 180px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
+  min-width: 180px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.save-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
 }
 
 .button-icon {
   font-size: 16px;
 }
 
+/* --- TARJETA DEL FORMULARIO --- */
+/* Aplica esta clase al div que envuelve tu formulario para el efecto flotante */
+.empresa-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+/* Encabezado interno del Perfil */
 .profile-header {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .profile-icon {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: #f0f5ff;
-  color: #2f54eb;
+  background: #eff6ff; /* Azul pastel ultra claro */
+  color: #2563eb;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -53,25 +95,86 @@
 }
 
 .section-icon {
-  font-size: 28px;
+  font-size: 26px;
 }
 
-.upload-icon {
-  font-size: 24px;
-  color: #2f54eb;
+.profile-text h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
 }
 
+.profile-text p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* --- GRILLA DE INPUTS --- */
+/* Usa esta clase para maquetar tus inputs a dos columnas como en tu foto */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* El asterisco rojo para campos requeridos */
+.required-mark {
+  color: #ef4444;
+  margin-right: 4px;
+}
+
+/* Estilos de los inputs para que coincidan con el login */
+.input-group input, 
+.input-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input-group input:focus, 
+.input-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* --- RESPONSIVIDAD --- */
 @media (max-width: 768px) {
   .empresa-header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
   }
 
   .save-button {
     width: 100%;
   }
 
-  .profile-header {
-    align-items: flex-start;
+  .empresa-card {
+    padding: 24px 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr; /* Pasa a 1 sola columna en celulares */
   }
 }
