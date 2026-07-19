@@ -7,30 +7,36 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   template: `
     <section class="hero-row">
       <div>
-        <h1>Dashboard</h1>
-        <p>Resumen general del sistema · jueves, 16 de abril de 2026</p>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Resumen general del sistema · jueves, 16 de abril de 2026</p>
       </div>
     </section>
 
     <section class="stats-grid">
       @for (card of cards; track card.title) {
-        <article class="stat-card" [className]="'stat-card accent-' + card.accent">
-          <div>
+        <article class="stat-card">
+          <div class="stat-info">
             <p>{{ card.title }}</p>
             <h2>{{ card.value }}</h2>
           </div>
-          <span class="stat-icon">{{ card.icon }}</span>
+          <div [className]="'stat-icon-wrapper accent-' + card.accent">
+            <span class="stat-icon">{{ card.icon }}</span>
+          </div>
         </article>
       }
     </section>
 
     <section class="panels-grid">
       <article class="panel card-large">
-        <h3>Gasto en Remuneraciones (Millones $)</h3>
+        <div class="panel-header">
+          <h3>Gasto en Remuneraciones (Millones $)</h3>
+        </div>
         <div class="bar-chart">
           @for (bar of bars; track bar.label) {
             <div class="bar-group">
-              <span class="bar" [style.height.%]="bar.height"></span>
+              <div class="bar-track">
+                <span class="bar" [style.height.%]="bar.height"></span>
+              </div>
               <small>{{ bar.label }}</small>
             </div>
           }
@@ -38,11 +44,16 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       </article>
 
       <article class="panel card-large">
-        <h3>Crecimiento de Empleados</h3>
+        <div class="panel-header">
+          <h3>Crecimiento de Empleados</h3>
+        </div>
         <div class="line-chart">
+          <div class="axis-line"></div>
           @for (point of growth; track point.label) {
             <div class="line-point">
-              <span class="dot"></span>
+              <div class="dot-wrapper">
+                <span class="dot"></span>
+              </div>
               <small>{{ point.label }}</small>
             </div>
           }
@@ -52,202 +63,271 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
     <section class="panels-grid bottom-grid">
       <article class="panel">
-        <h3>Alertas Recientes</h3>
-        <div class="alert success">3 contratos vencen en los próximos 15 días</div>
-        <div class="alert info">Nuevos parámetros de Previred disponibles para abril</div>
-        <div class="alert positive">LRE de marzo generado exitosamente</div>
+        <div class="panel-header">
+          <h3>Alertas Recientes</h3>
+        </div>
+        <div class="alerts-container">
+          <div class="alert alert-warning">
+            <span class="alert-icon">⚠️</span>
+            <p>3 contratos vencen en los próximos 15 días</p>
+          </div>
+          <div class="alert alert-info">
+            <span class="alert-icon">ℹ️</span>
+            <p>Nuevos parámetros de Previred disponibles para abril</p>
+          </div>
+          <div class="alert alert-success">
+            <span class="alert-icon">✅</span>
+            <p>LRE de marzo generado exitosamente</p>
+          </div>
+        </div>
       </article>
 
       <article class="panel">
-        <h3>Tareas Pendientes</h3>
+        <div class="panel-header">
+          <h3>Tareas Pendientes</h3>
+        </div>
         <ul class="tasks-list">
-          <li><span class="dot red"></span>Generar liquidación de Juan Pérez <time>16 Abr</time></li>
-          <li><span class="dot yellow"></span>Revisar solicitud de vacaciones - María González <time>18 Abr</time></li>
-          <li><span class="dot yellow"></span>Actualizar datos previsionales <time>20 Abr</time></li>
-          <li><span class="dot red"></span>Firmar contrato de nuevo empleado <time>17 Abr</time></li>
+          <li>
+            <div class="task-info">
+              <span class="indicator red"></span>
+              <span>Generar liquidación de Juan Pérez</span>
+            </div>
+            <time>16 Abr</time>
+          </li>
+          <li>
+            <div class="task-info">
+              <span class="indicator yellow"></span>
+              <span>Revisar solicitud de vacaciones - María González</span>
+            </div>
+            <time>18 Abr</time>
+          </li>
+          <li>
+            <div class="task-info">
+              <span class="indicator yellow"></span>
+              <span>Actualizar datos previsionales</span>
+            </div>
+            <time>20 Abr</time>
+          </li>
+          <li>
+            <div class="task-info">
+              <span class="indicator red"></span>
+              <span>Firmar contrato de nuevo empleado</span>
+            </div>
+            <time>17 Abr</time>
+          </li>
         </ul>
       </article>
     </section>
   `,
   styles: [`
     :host {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-bottom: 24px;
+    }
+
+    /* Tipografía General */
+    h1, h2, h3, p { margin: 0; }
+    
+    .hero-row { margin-bottom: 8px; }
+    .page-title { font-size: 1.8rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+    .page-subtitle { margin-top: 4px; color: #64748b; font-size: 0.95rem; }
+
+    /* Grillas */
+    .stats-grid {
       display: grid;
-      gap: 18px;
-    }
-
-    .hero-row h1,
-    .panel h3,
-    .stat-card h2,
-    .stat-card p {
-      margin: 0;
-    }
-
-    .hero-row p {
-      margin: 6px 0 0;
-      color: #64748b;
-    }
-
-    .stats-grid,
-    .panels-grid {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
 
     .panels-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
     }
 
-    .panel,
-    .stat-card {
+    /* Tarjetas Base */
+    .panel, .stat-card {
+      background: #ffffff;
       border-radius: 20px;
-      background: #fff;
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
-      padding: 18px;
+      padding: 24px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
     }
 
+    .stat-card:hover, .panel:hover {
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+      transform: translateY(-2px);
+    }
+
+    /* Diseño de Tarjetas KPI */
     .stat-card {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      min-height: 94px;
     }
 
-    .stat-card p {
-      font-size: 0.85rem;
-      color: #64748b;
-    }
+    .stat-info p { font-size: 0.9rem; color: #64748b; font-weight: 600; margin-bottom: 8px; }
+    .stat-info h2 { font-size: 2rem; font-weight: 800; color: #0f172a; line-height: 1; }
 
-    .stat-card h2 {
-      font-size: 1.75rem;
-      margin-top: 6px;
-    }
-
-    .stat-icon {
+    .stat-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
       display: grid;
       place-items: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      color: #fff;
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1.5rem;
     }
 
-    .accent-blue .stat-icon { background: #3b82f6; }
-    .accent-orange .stat-icon { background: #f97316; }
-    .accent-green .stat-icon { background: #22c55e; }
-    .accent-purple .stat-icon { background: #a855f7; }
+    /* Acentos de color (Fondo claro + Texto oscuro) */
+    .accent-blue { background: #eff6ff; color: #2563eb; }
+    .accent-orange { background: #fff7ed; color: #ea580c; }
+    .accent-green { background: #f0fdf4; color: #16a34a; }
+    .accent-purple { background: #faf5ff; color: #9333ea; }
 
-    .card-large h3 {
-      margin-bottom: 14px;
-    }
+    /* Paneles Grandes */
+    .panel-header { margin-bottom: 24px; }
+    .panel-header h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
 
+    /* Gráfico de Barras CSS */
     .bar-chart {
-      height: 220px;
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      align-items: end;
-      gap: 12px;
-      padding: 8px 4px 0;
+      height: 200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 20px;
     }
 
     .bar-group {
-      display: grid;
-      gap: 6px;
-      justify-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .bar-track {
+      width: 40px;
+      height: 150px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
     }
 
     .bar {
       width: 100%;
-      max-width: 52px;
-      border-radius: 12px 12px 6px 6px;
-      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+      background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 8px;
+      transition: height 1s ease-out;
+    }
+    
+    .bar-group:hover .bar { background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%); }
+    .bar-group small { color: #64748b; font-weight: 600; font-size: 0.85rem; }
+
+    /* Gráfico de Líneas CSS (Puntos) */
+    .line-chart {
+      height: 200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
     }
 
-    .line-chart {
-      height: 220px;
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      align-items: end;
-      gap: 12px;
-      padding: 8px 4px 0;
+    .axis-line {
+      position: absolute;
+      bottom: 28px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: 1;
     }
 
     .line-point {
-      display: grid;
-      justify-items: center;
-      gap: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .dot-wrapper {
+      height: 150px; /* Espacio para animar o posicionar el punto */
+      display: flex;
+      align-items: center;
     }
 
     .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
       background: #10b981;
-      box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.14);
+      border: 3px solid #ffffff;
+      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+      transition: transform 0.2s;
     }
 
-    .bottom-grid {
-      grid-template-columns: 1fr 1fr;
-    }
+    .line-point:hover .dot { transform: scale(1.3); }
+    .line-point small { color: #64748b; font-weight: 600; font-size: 0.85rem; }
 
+    /* Alertas */
+    .alerts-container { display: flex; flex-direction: column; gap: 12px; }
+    
     .alert {
-      padding: 14px 16px;
-      border-radius: 14px;
-      margin-top: 12px;
-      border: 1px solid transparent;
-      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
     }
 
-    .alert.success { background: #fff7ed; border-color: #fdba74; }
-    .alert.info { background: #eff6ff; border-color: #bfdbfe; }
-    .alert.positive { background: #f0fdf4; border-color: #bbf7d0; }
+    .alert-icon { font-size: 1.2rem; }
+    .alert-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .alert-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
+    /* Lista de Tareas */
     .tasks-list {
       list-style: none;
       padding: 0;
-      margin: 8px 0 0;
-      display: grid;
-      gap: 12px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .tasks-list li {
       display: flex;
-      align-items: center;
-      gap: 10px;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .tasks-list time {
-      color: #94a3b8;
-      font-size: 0.85rem;
+    .tasks-list li:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .task-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #334155;
+      font-weight: 500;
+      font-size: 0.95rem;
     }
 
-    .dot.red,
-    .dot.yellow {
-      width: 8px;
-      height: 8px;
-      box-shadow: none;
-      flex: 0 0 auto;
-    }
+    .indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .indicator.red { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+    .indicator.yellow { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
 
-    .dot.red { background: #ef4444; }
-    .dot.yellow { background: #f59e0b; }
+    .tasks-list time { color: #94a3b8; font-size: 0.85rem; font-weight: 600; }
 
-    @media (max-width: 1100px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .panels-grid,
-      .bottom-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 768px) {
+      .panels-grid { grid-template-columns: 1fr; }
     }
   `]
 })
@@ -260,12 +340,12 @@ export class DashboardPageComponent {
   ];
 
   readonly bars = [
-    { label: 'Oct', height: 58 },
-    { label: 'Nov', height: 62 },
-    { label: 'Dic', height: 68 },
-    { label: 'Ene', height: 64 },
-    { label: 'Feb', height: 70 },
-    { label: 'Mar', height: 74 },
+    { label: 'Oct', height: 45 },
+    { label: 'Nov', height: 55 },
+    { label: 'Dic', height: 80 },
+    { label: 'Ene', height: 65 },
+    { label: 'Feb', height: 75 },
+    { label: 'Mar', height: 90 },
   ];
 
   readonly growth = [
