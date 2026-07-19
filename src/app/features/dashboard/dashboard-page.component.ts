@@ -27,38 +27,65 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     </section>
 
     <section class="panels-grid">
-      <article class="panel card-large">
-        <div class="panel-header">
-          <h3>Gasto en Remuneraciones (Millones $)</h3>
-        </div>
-        <div class="bar-chart">
-          @for (bar of bars; track bar.label) {
-            <div class="bar-group">
-              <div class="bar-track">
-                <span class="bar" [style.height.%]="bar.height"></span>
+      @if (bars.length > 0 && growth.length > 0) {
+        <article class="panel card-large">
+          <div class="panel-header">
+            <h3>Gasto en Remuneraciones (Millones $)</h3>
+          </div>
+          <div class="bar-chart">
+            @for (bar of bars; track bar.label) {
+              <div class="bar-group">
+                <div class="bar-track">
+                  <span class="bar" [style.height.%]="bar.height"></span>
+                </div>
+                <small>{{ bar.label }}</small>
               </div>
-              <small>{{ bar.label }}</small>
-            </div>
-          }
-        </div>
-      </article>
+            }
+          </div>
+        </article>
 
-      <article class="panel card-large">
-        <div class="panel-header">
-          <h3>Crecimiento de Empleados</h3>
-        </div>
-        <div class="line-chart">
-          <div class="axis-line"></div>
-          @for (point of growth; track point.label) {
-            <div class="line-point">
-              <div class="dot-wrapper">
-                <span class="dot"></span>
-              </div>
-              <small>{{ point.label }}</small>
+        <article class="panel card-large">
+          <div class="panel-header">
+            <h3>Crecimiento de Empleados</h3>
+          </div>
+          <div class="growth-chart">
+            <svg viewBox="0 0 600 240" role="img" aria-label="Crecimiento de empleados por mes">
+              <defs>
+                <linearGradient id="growthFill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#bfdbfe" stop-opacity="0.8" />
+                  <stop offset="100%" stop-color="#eff6ff" stop-opacity="0.2" />
+                </linearGradient>
+              </defs>
+
+              <path class="growth-area" [attr.d]="growthAreaPath"></path>
+              <path class="growth-line" [attr.d]="growthLinePath"></path>
+
+              @for (point of growthPlot; track point.label) {
+                <g>
+                  <line class="growth-guide" [attr.x1]="point.x" y1="26" [attr.x2]="point.x" y2="182"></line>
+                  <circle class="growth-dot" [attr.cx]="point.x" [attr.cy]="point.y" r="6"></circle>
+                  <text class="growth-value" [attr.x]="point.x" [attr.y]="point.y - 16">{{ point.value }}</text>
+                </g>
+              }
+            </svg>
+
+            <div class="growth-labels">
+              @for (point of growthPlot; track point.label) {
+                <span>{{ point.label }}</span>
+              }
             </div>
-          }
-        </div>
-      </article>
+          </div>
+        </article>
+      } @else {
+        <article class="panel card-large empty-state-panel">
+          <div class="panel-header">
+            <h3>Gráficos sin información</h3>
+          </div>
+          <p class="empty-state-text">
+            No hay datos simulados para los gráficos todavía. Agrega una fuente de datos o vuelve a cargar el panel.
+          </p>
+        </article>
+      }
     </section>
 
     <section class="panels-grid bottom-grid">
@@ -228,51 +255,75 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     .bar-group:hover .bar { background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%); }
     .bar-group small { color: #64748b; font-weight: 600; font-size: 0.85rem; }
 
-    /* Gráfico de Líneas CSS (Puntos) */
-    .line-chart {
-      height: 200px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      position: relative;
-    }
-
-    .axis-line {
-      position: absolute;
-      bottom: 28px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #e2e8f0;
-      z-index: 1;
-    }
-
-    .line-point {
+    /* Gráfico de crecimiento */
+    .growth-chart {
       display: flex;
       flex-direction: column;
-      align-items: center;
       gap: 12px;
-      z-index: 2;
     }
 
-    .dot-wrapper {
-      height: 150px; /* Espacio para animar o posicionar el punto */
+    .growth-chart svg {
+      width: 100%;
+      height: 240px;
+      overflow: visible;
+    }
+
+    .growth-area {
+      fill: url(#growthFill);
+    }
+
+    .growth-line {
+      fill: none;
+      stroke: #2563eb;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .growth-guide {
+      stroke: #dbeafe;
+      stroke-width: 1.5;
+      stroke-dasharray: 4 6;
+    }
+
+    .growth-dot {
+      fill: #ffffff;
+      stroke: #2563eb;
+      stroke-width: 4;
+    }
+
+    .growth-value {
+      fill: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+
+    .growth-labels {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .growth-labels span {
+      text-align: center;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .empty-state-panel {
+      min-height: 240px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #10b981;
-      border: 3px solid #ffffff;
-      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
-      transition: transform 0.2s;
+    .empty-state-text {
+      color: #64748b;
+      line-height: 1.6;
+      max-width: 520px;
     }
-
-    .line-point:hover .dot { transform: scale(1.3); }
-    .line-point small { color: #64748b; font-weight: 600; font-size: 0.85rem; }
 
     /* Alertas */
     .alerts-container { display: flex; flex-direction: column; gap: 12px; }
@@ -349,11 +400,41 @@ export class DashboardPageComponent {
   ];
 
   readonly growth = [
-    { label: 'Oct' },
-    { label: 'Nov' },
-    { label: 'Dic' },
-    { label: 'Ene' },
-    { label: 'Feb' },
-    { label: 'Mar' },
+    { label: 'Oct', value: 16 },
+    { label: 'Nov', value: 18 },
+    { label: 'Dic', value: 21 },
+    { label: 'Ene', value: 20 },
+    { label: 'Feb', value: 24 },
+    { label: 'Mar', value: 27 },
   ];
+
+  private readonly chartWidth = 600;
+  private readonly chartHeight = 240;
+  private readonly chartPaddingX = 40;
+  private readonly chartPaddingY = 32;
+
+  get growthPlot() {
+    const maxValue = Math.max(...this.growth.map((point) => point.value));
+    const plotWidth = this.chartWidth - this.chartPaddingX * 2;
+    const plotHeight = this.chartHeight - this.chartPaddingY * 2;
+    const step = this.growth.length > 1 ? plotWidth / (this.growth.length - 1) : 0;
+
+    return this.growth.map((point, index) => {
+      const x = this.chartPaddingX + step * index;
+      const y = this.chartPaddingY + (1 - point.value / maxValue) * plotHeight;
+
+      return { ...point, x, y };
+    });
+  }
+
+  get growthLinePath(): string {
+    return this.growthPlot.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+  }
+
+  get growthAreaPath(): string {
+    const baseLine = this.chartHeight - this.chartPaddingY;
+    const points = this.growthPlot.map((point) => `${point.x} ${point.y}`).join(' ');
+
+    return `M ${this.chartPaddingX} ${baseLine} L ${points} L ${this.chartWidth - this.chartPaddingX} ${baseLine} Z`;
+  }
 }

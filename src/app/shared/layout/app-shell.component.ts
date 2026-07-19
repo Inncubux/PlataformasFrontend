@@ -10,17 +10,17 @@ import { AppSidebarComponent } from './sidebar.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, AppNavbarComponent, AppSidebarComponent, AppFooterComponent],
   template: `
-    <main class="floating-layout">
-      <div class="layout-grid">
-        <app-sidebar></app-sidebar>
+    <main class="admin-layout">
+      <app-sidebar></app-sidebar>
 
-        <div class="main-column">
-          <app-navbar></app-navbar>
-          
-          <div class="content-scroll-area">
+      <div class="main-wrapper">
+        <app-navbar></app-navbar>
+        
+        <div class="content-scroll-area">
+          <div class="page-container">
             <router-outlet></router-outlet>
-            <app-footer></app-footer> 
           </div>
+          <app-footer></app-footer> 
         </div>
       </div>
     </main>
@@ -30,41 +30,38 @@ import { AppSidebarComponent } from './sidebar.component';
       display: block;
       height: 100vh;
       width: 100vw;
-      background-color: #f0f2f5; /* El fondo gris claro de tus capturas */
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    .floating-layout {
-      height: 100%;
-      padding: 16px 24px;
-      box-sizing: border-box;
-    }
-
-    .layout-grid {
+    .admin-layout {
       display: flex;
-      gap: 24px;
       height: 100%;
-      max-width: 1600px;
-      margin: 0 auto;
+      background-color: #f1f5f9; /* Fondo gris claro del área de trabajo */
+      overflow: hidden;
     }
 
-    .main-column {
+    .main-wrapper {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      overflow: hidden; /* Evita que la pantalla completa haga scroll */
+      min-width: 0; /* Evita que el flex-child rompa el layout si el contenido es ancho */
     }
 
     .content-scroll-area {
       flex: 1;
-      overflow-y: auto; /* El scroll solo ocurre en tu dashboard/formularios */
-      padding-right: 8px; /* Espacio para la barra de scroll */
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Ocultar barra de scroll para un look más limpio (opcional) */
-    .content-scroll-area::-webkit-scrollbar { width: 6px; }
-    .content-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .page-container {
+      padding: 24px 32px;
+      flex: 1;
+    }
+
+    /* Scrollbar sutil */
+    .content-scroll-area::-webkit-scrollbar { width: 8px; }
+    .content-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   `]
 })
 export class AppShellComponent {}
