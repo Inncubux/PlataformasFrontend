@@ -1,59 +1,205 @@
-# PlataformaFront
+# 💼 Pyme SP - Sistema de Remuneraciones
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.13.
+Plataforma web para la gestión de remuneraciones, administración de empleados y configuración de parámetros previsionales conforme a la normativa laboral chilena.
 
-## Development server
+Este repositorio contiene la arquitectura inicial del proyecto (Sprint 1), incluyendo la estructura modular del frontend, la API backend y la orquestación de contenedores para despliegue local.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
+## 📋 Descripción General
+
+Pyme SP busca simplificar la administración de recursos humanos y remuneraciones para pequeñas y medianas empresas, proporcionando herramientas para:
+
+* Gestión de empleados.
+* Cálculo y administración de remuneraciones.
+* Configuración de parámetros previsionales.
+* Integración con normativas laborales chilenas.
+* Administración centralizada mediante una plataforma web moderna.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### Frontend
+
+* Angular 20
+* Standalone Components
+* NG-ZORRO
+
+### Backend
+
+* .NET 8
+* ASP.NET Core Web API
+* Entity Framework Core
+
+### Base de Datos
+
+* PostgreSQL 15
+
+### Infraestructura
+
+* Docker
+* Docker Compose
+
+---
+
+## 🏗️ Arquitectura
+
+El sistema se encuentra desacoplado en tres capas principales:
+
+```text
+┌─────────────────┐
+│    Frontend     │
+│   Angular 20    │
+└────────┬────────┘
+         │ HTTP/REST
+         ▼
+┌─────────────────┐
+│   Backend API   │
+│    .NET 8       │
+└────────┬────────┘
+         │ EF Core
+         ▼
+┌─────────────────┐
+│   PostgreSQL    │
+│     v15         │
+└─────────────────┘
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Cada servicio se ejecuta en un contenedor independiente y se comunica mediante una red privada de Docker.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 🚀 Despliegue Local con Docker
 
-```bash
-ng generate component component-name
-```
+### Requisitos
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+* Docker Desktop instalado y en ejecución.
+* Docker Compose habilitado.
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### Clonar el repositorio
 
 ```bash
-ng build
+git clone <url-del-repositorio>
+cd <carpeta-raiz>
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Construir y levantar los contenedores
 
 ```bash
-ng test
+docker-compose up --build -d
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+### Verificar contenedores activos
 
 ```bash
-ng e2e
+docker ps
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## 🌐 Acceso a los Servicios
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Servicio    | URL / Puerto          |
+| ----------- | --------------------- |
+| Frontend    | http://localhost:80   |
+| Backend API | http://localhost:5000 |
+| PostgreSQL  | localhost:5432        |
+
+### Configuración PostgreSQL
+
+| Parámetro     | Valor        |
+| ------------- | ------------ |
+| Usuario       | postgres     |
+| Contraseña    | admin_pymesp |
+| Base de Datos | pymesp_db    |
+
+---
+
+## 🛑 Detener los Servicios
+
+Para detener y eliminar los contenedores:
+
+```bash
+docker-compose down
+```
+
+Para eliminar también los volúmenes:
+
+```bash
+docker-compose down -v
+```
+
+---
+
+## 💻 Desarrollo Frontend (Hot Reload)
+
+Si deseas trabajar únicamente sobre la interfaz gráfica sin utilizar Docker:
+
+```bash
+cd PlataformasFrontend
+pnpm install
+pnpm start
+```
+
+La aplicación estará disponible en:
+
+```text
+http://localhost:4200
+```
+
+---
+
+## 📂 Estructura del Proyecto
+
+```text
+/
+├── PlataformasFrontend/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+│
+├── Backend/
+│   ├── Controllers/
+│   ├── Services/
+│   ├── Models/
+│   └── Program.cs
+│
+├── docker-compose.yml
+├── Dockerfile
+└── README.md
+```
+
+---
+
+## 👥 Equipo de Desarrollo
+
+### Samuel Fuentes
+
+**Full Stack Developer / Líder Técnico**
+
+### Pamela Vera
+
+**Backend Developer**
+
+* Contabilidad
+* Criptografía
+
+### Matías Carmona
+
+**Backend Developer**
+
+* Gestión Empresarial
+* APIs Externas
+
+### Axel Mondaca
+
+**Frontend Developer / DevOps**
+
+---
+
+## 📄 Licencia
+
+Proyecto desarrollado con fines académicos y de aprendizaje.
+
+Todos los derechos reservados © Pyme SP.
