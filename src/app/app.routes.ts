@@ -6,6 +6,7 @@ import { EmpleadosPageComponent } from './features/empleados/empleados-page.comp
 import { EmpresaFormComponent } from './features/empresa/empresa-form.component';
 import { LiquidacionesPageComponent } from './features/liquidaciones/liquidaciones-page.component';
 import { LoginPageComponent } from './features/auth/login-page.component';
+import { authGuard } from './core/auth/auth.guard';
 import { VacacionesPageComponent } from './features/vacaciones/vacaciones-page.component';
 
 export const routes: Routes = [
@@ -16,6 +17,7 @@ export const routes: Routes = [
 	{
 		path: '',
 		component: AppShellComponent,
+		canActivate: [authGuard],
 		children: [
 			{ path: '', pathMatch: 'full', redirectTo: 'dashboard' },
 			{ path: 'dashboard', component: DashboardPageComponent },

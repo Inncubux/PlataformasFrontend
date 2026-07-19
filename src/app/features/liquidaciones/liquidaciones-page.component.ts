@@ -1,13 +1,29 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 // Módulos necesarios de NG-ZORRO para esta vista
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { CommonModule } from '@angular/common';
+
+type LiquidacionRow = {
+  empleado: string;
+  rut: string;
+  periodo: string;
+  base: string;
+  haberes: string;
+  descuentos: string;
+  liquido: string;
+  estado: 'Firmado' | 'Pendiente';
+};
+
+type LiquidacionModalMode = 'create' | 'view';
 
 @Component({
   selector: 'app-liquidaciones-page',
@@ -15,8 +31,11 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     NzButtonModule,
     NzIconModule,
+    NzInputModule,
+    NzModalModule,
     NzTableModule,
     NzTagModule,
     NzCardModule,
@@ -32,7 +51,7 @@ import { CommonModule } from '@angular/common';
         </div>
         <div class="actions">
           <button nz-button class="btn-secondary">Generar LRE (CSV)</button>
-          <button nz-button nzType="primary" class="btn-primary">
+          <button nz-button nzType="primary" class="btn-primary" (click)="openLiquidacionModal()">
             <span nz-icon nzType="plus"></span>
             Nueva Liquidación
           </button>
@@ -91,13 +110,94 @@ import { CommonModule } from '@angular/common';
                   }
                 </td>
                 <td nzAlign="right" class="action-links">
-                  <a>Ver</a> <span class="divider">·</span> <a>Descargar</a>
+                  <a (click)="openLiquidacionModal(item, 'view')">Ver</a> <span class="divider">·</span> <a>Descargar</a>
                 </td>
               </tr>
             }
           </tbody>
         </nz-table>
       </section>
+
+      <nz-modal
+        [(nzVisible)]="liquidacionModalVisible"
+        [nzTitle]="liquidacionModalTitle"
+        [nzFooter]="null"
+        [nzWidth]="640"
+        (nzOnCancel)="closeLiquidacionModal()"
+      >
+          <ng-template nzModalContent>
+            <div class="modal-body-stack">
+              <div class="modal-details" [hidden]="liquidacionModalMode !== 'view'">
+                <p class="modal-description">Consulta los datos completos de la liquidación.</p>
+                <div class="details-grid">
+                  <div class="detail-item"><span>Empleado</span><strong>{{ liquidacionForm.get('empleado')?.value }}</strong></div>
+                  <div class="detail-item"><span>RUT</span><strong>{{ liquidacionForm.get('rut')?.value }}</strong></div>
+                  <div class="detail-item"><span>Período</span><strong>{{ liquidacionForm.get('periodo')?.value }}</strong></div>
+                  <div class="detail-item"><span>Sueldo base</span><strong>{{ liquidacionForm.get('base')?.value }}</strong></div>
+                  <div class="detail-item"><span>Total haberes</span><strong>{{ liquidacionForm.get('haberes')?.value }}</strong></div>
+                  <div class="detail-item"><span>Descuentos</span><strong>{{ liquidacionForm.get('descuentos')?.value }}</strong></div>
+                  <div class="detail-item"><span>Líquido</span><strong>{{ liquidacionForm.get('liquido')?.value }}</strong></div>
+                  <div class="detail-item"><span>Estado</span><strong>{{ liquidacionForm.get('estado')?.value }}</strong></div>
+                </div>
+                <div class="modal-actions">
+                  <button nz-button type="button" class="btn-cancel" (click)="closeLiquidacionModal()">Cerrar</button>
+                </div>
+              </div>
+
+              <form [formGroup]="liquidacionForm" class="modal-form" [hidden]="liquidacionModalMode === 'view'">
+                <p class="modal-description">Completa todos los datos para crear la liquidación.</p>
+                <div class="modal-grid">
+                  <label class="field">
+                    <span>Empleado</span>
+                    <input nz-input formControlName="empleado" placeholder="Nombre del empleado" />
+                  </label>
+
+                  <label class="field">
+                    <span>RUT</span>
+                    <input nz-input formControlName="rut" placeholder="12.345.678-9" />
+                  </label>
+
+                  <label class="field">
+                    <span>Período</span>
+                    <input nz-input formControlName="periodo" placeholder="Marzo 2026" />
+                  </label>
+
+                  <label class="field">
+                    <span>Sueldo base</span>
+                    <input nz-input formControlName="base" placeholder="$1.500.000" />
+                  </label>
+
+                  <label class="field">
+                    <span>Total haberes</span>
+                    <input nz-input formControlName="haberes" placeholder="$1.600.000" />
+                  </label>
+
+                  <label class="field">
+                    <span>Descuentos</span>
+                    <input nz-input formControlName="descuentos" placeholder="$350.000" />
+                  </label>
+
+                  <label class="field">
+                    <span>Líquido</span>
+                    <input nz-input formControlName="liquido" placeholder="$1.250.000" />
+                  </label>
+
+                  <label class="field field-full">
+                    <span>Estado</span>
+                    <input nz-input formControlName="estado" placeholder="Firmado / Pendiente" />
+                  </label>
+                </div>
+
+                <div class="modal-actions">
+                  <button nz-button type="button" class="btn-cancel" (click)="closeLiquidacionModal()">Cancelar</button>
+                  <button nz-button nzType="primary" type="button" class="btn-save" (click)="saveLiquidacion()" [disabled]="liquidacionForm.invalid">
+                    Guardar liquidación
+                  </button>
+                </div>
+              </form>
+            </div>
+          </ng-template>
+      </nz-modal>
       
     </div>
   `,
@@ -279,18 +379,93 @@ import { CommonModule } from '@angular/common';
     .action-links a:hover { color: #1d4ed8; text-decoration: underline; }
     .action-links .divider { color: #cbd5e1; margin: 0 8px; }
 
+    .modal-description {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 8px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .field span {
+      font-size: 0.9rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cancel,
+    .btn-save {
+      height: 42px;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-weight: 700;
+    }
+
+    .btn-cancel {
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      background: #ffffff;
+    }
+
+    .btn-save {
+      background: #2563eb;
+      border: none;
+      color: #ffffff;
+    }
+
     /* --- RESPONSIVIDAD --- */
     @media (max-width: 768px) {
       .page-head { flex-direction: column; align-items: flex-start; }
       .actions { width: 100%; }
       .actions button { flex: 1; justify-content: center; }
+      .modal-grid { grid-template-columns: 1fr; }
       ::ng-deep .ant-table { overflow-x: auto; display: block; }
     }
   `]
 })
 export class LiquidacionesPageComponent {
+  private readonly formBuilder = new FormBuilder();
+
+  liquidacionModalVisible = false;
+  liquidacionModalMode: LiquidacionModalMode = 'create';
+
+  readonly liquidacionForm = this.formBuilder.nonNullable.group({
+    empleado: ['', [Validators.required]],
+    rut: ['', [Validators.required]],
+    periodo: ['', [Validators.required]],
+    base: ['', [Validators.required]],
+    haberes: ['', [Validators.required]],
+    descuentos: ['', [Validators.required]],
+    liquido: ['', [Validators.required]],
+    estado: ['Pendiente' as LiquidacionRow['estado'], [Validators.required]],
+  });
+
   // Llevamos la data al controlador para que Zorro la pinte con @for (Iterador de Angular 17+)
-  readonly liquidacionesMock = [
+  liquidacionesMock: LiquidacionRow[] = [
     {
       empleado: 'Juan Pérez Rodríguez',
       rut: '12.345.678-9',
@@ -322,4 +497,56 @@ export class LiquidacionesPageComponent {
       estado: 'Pendiente'
     }
   ];
+
+  get liquidacionModalTitle(): string {
+    return this.liquidacionModalMode === 'view' ? 'Detalle de liquidación' : 'Nueva liquidación';
+  }
+
+  get isReadOnly(): boolean {
+    return this.liquidacionModalMode === 'view';
+  }
+
+  openLiquidacionModal(liquidacion?: LiquidacionRow, mode: LiquidacionModalMode = 'create'): void {
+    this.liquidacionModalMode = mode;
+    this.liquidacionForm.reset({
+      empleado: liquidacion?.empleado ?? '',
+      rut: liquidacion?.rut ?? '',
+      periodo: liquidacion?.periodo ?? '',
+      base: liquidacion?.base ?? '',
+      haberes: liquidacion?.haberes ?? '',
+      descuentos: liquidacion?.descuentos ?? '',
+      liquido: liquidacion?.liquido ?? '',
+      estado: liquidacion?.estado ?? 'Pendiente',
+    });
+    this.liquidacionModalVisible = true;
+  }
+
+  closeLiquidacionModal(): void {
+    this.liquidacionModalVisible = false;
+  }
+
+  saveLiquidacion(): void {
+    if (this.liquidacionForm.invalid) {
+      this.liquidacionForm.markAllAsTouched();
+      return;
+    }
+
+    const liquidacion = this.liquidacionForm.getRawValue();
+
+    this.liquidacionesMock = [
+      ...this.liquidacionesMock,
+      {
+        empleado: liquidacion.empleado,
+        rut: liquidacion.rut,
+        periodo: liquidacion.periodo,
+        base: liquidacion.base,
+        haberes: liquidacion.haberes,
+        descuentos: liquidacion.descuentos,
+        liquido: liquidacion.liquido,
+        estado: liquidacion.estado as LiquidacionRow['estado'],
+      },
+    ];
+
+    this.closeLiquidacionModal();
+  }
 }

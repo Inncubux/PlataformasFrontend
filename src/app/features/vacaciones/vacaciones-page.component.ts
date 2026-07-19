@@ -1,11 +1,29 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 // Módulos de NG-ZORRO
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+
+type VacationRow = {
+  empleado: string;
+  rut: string;
+  tipo: 'Vacaciones' | 'Permiso';
+  fechaInicio: string;
+  fechaFin: string;
+  dias: number;
+  disponibles: number;
+  solicitado: string;
+  estado: 'Aprobado' | 'Pendiente' | 'Rechazado';
+  motivo: string;
+};
+
+type VacationModalMode = 'create' | 'view';
 
 @Component({
   selector: 'app-vacaciones-page',
@@ -13,8 +31,11 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     NzButtonModule,
     NzIconModule,
+    NzInputModule,
+    NzModalModule,
     NzTableModule,
     NzTagModule
   ],
@@ -26,7 +47,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
           <h1 class="page-title">Vacaciones y Permisos</h1>
           <p class="page-subtitle">Gestión de solicitudes y control de días disponibles</p>
         </div>
-        <button nz-button nzType="primary" class="btn-primary">
+        <button nz-button nzType="primary" class="btn-primary" (click)="openSolicitudModal()">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           Nueva Solicitud
         </button>
@@ -103,11 +124,13 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
                 </td>
                 <td nzAlign="right" class="action-links">
                   @if (item.estado === 'Aprobado') {
+                    <a (click)="openSolicitudModal(item, 'view')">Ver detalle</a>
+                    <span class="divider">·</span>
                     <a>Descargar</a>
                   } @else if (item.estado === 'Pendiente') {
-                    <a>Aprobar</a> <span class="divider">·</span> <a>Rechazar</a>
+                    <a (click)="approveSolicitud(item.rut)">Aprobar</a> <span class="divider">·</span> <a (click)="rejectSolicitud(item.rut)">Rechazar</a> <span class="divider">·</span> <a (click)="openSolicitudModal(item, 'view')">Ver detalle</a>
                   } @else {
-                    <a>Ver detalle</a>
+                    <a (click)="openSolicitudModal(item, 'view')">Ver detalle</a>
                   }
                 </td>
               </tr>
@@ -115,6 +138,99 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
           </tbody>
         </nz-table>
       </section>
+
+      <nz-modal
+        [(nzVisible)]="solicitudModalVisible"
+        [nzTitle]="solicitudModalTitle"
+        [nzFooter]="null"
+        [nzWidth]="640"
+        (nzOnCancel)="closeSolicitudModal()"
+      >
+          <ng-template nzModalContent>
+            <div class="modal-body-stack">
+              <div class="modal-details" [hidden]="solicitudModalMode !== 'view'">
+                <p class="modal-description">Revisa la solicitud completa.</p>
+                <div class="details-grid">
+                  <div class="detail-item"><span>Empleado</span><strong>{{ solicitudForm.get('empleado')?.value }}</strong></div>
+                  <div class="detail-item"><span>RUT</span><strong>{{ solicitudForm.get('rut')?.value }}</strong></div>
+                  <div class="detail-item"><span>Tipo</span><strong>{{ solicitudForm.get('tipo')?.value }}</strong></div>
+                  <div class="detail-item"><span>Fecha inicio</span><strong>{{ solicitudForm.get('fechaInicio')?.value }}</strong></div>
+                  <div class="detail-item"><span>Fecha fin</span><strong>{{ solicitudForm.get('fechaFin')?.value }}</strong></div>
+                  <div class="detail-item"><span>Días</span><strong>{{ solicitudForm.get('dias')?.value }}</strong></div>
+                  <div class="detail-item"><span>Días disponibles</span><strong>{{ solicitudForm.get('disponibles')?.value }}</strong></div>
+                  <div class="detail-item"><span>Solicitado</span><strong>{{ solicitudForm.get('solicitado')?.value }}</strong></div>
+                  <div class="detail-item detail-item-full"><span>Motivo</span><strong>{{ solicitudForm.get('motivo')?.value }}</strong></div>
+                  <div class="detail-item detail-item-full"><span>Estado</span><strong>{{ solicitudForm.get('estado')?.value }}</strong></div>
+                </div>
+                <div class="modal-actions">
+                  <button nz-button type="button" class="btn-cancel" (click)="closeSolicitudModal()">Cerrar</button>
+                </div>
+              </div>
+
+              <form [formGroup]="solicitudForm" class="modal-form" [hidden]="solicitudModalMode === 'view'">
+                <p class="modal-description">Completa los datos para registrar una nueva solicitud.</p>
+                <div class="modal-grid">
+                  <label class="field">
+                    <span>Empleado</span>
+                    <input nz-input formControlName="empleado" placeholder="Nombre del empleado" />
+                  </label>
+
+                  <label class="field">
+                    <span>RUT</span>
+                    <input nz-input formControlName="rut" placeholder="12.345.678-9" />
+                  </label>
+
+                  <label class="field">
+                    <span>Tipo</span>
+                    <input nz-input formControlName="tipo" placeholder="Vacaciones o permiso" />
+                  </label>
+
+                  <label class="field">
+                    <span>Fecha inicio</span>
+                    <input nz-input formControlName="fechaInicio" placeholder="30 abr 2026" />
+                  </label>
+
+                  <label class="field">
+                    <span>Fecha fin</span>
+                    <input nz-input formControlName="fechaFin" placeholder="09 may 2026" />
+                  </label>
+
+                  <label class="field">
+                    <span>Días</span>
+                    <input nz-input formControlName="dias" placeholder="8" />
+                  </label>
+
+                  <label class="field">
+                    <span>Días disponibles</span>
+                    <input nz-input formControlName="disponibles" placeholder="10" />
+                  </label>
+
+                  <label class="field">
+                    <span>Motivo</span>
+                    <input nz-input formControlName="motivo" placeholder="Motivo de la solicitud" />
+                  </label>
+
+                  <label class="field">
+                    <span>Solicitado</span>
+                    <input nz-input formControlName="solicitado" placeholder="09 abr 2026" />
+                  </label>
+
+                  <label class="field field-full">
+                    <span>Estado</span>
+                    <input nz-input formControlName="estado" placeholder="Aprobado / Pendiente / Rechazado" />
+                  </label>
+                </div>
+
+                <div class="modal-actions">
+                  <button nz-button type="button" class="btn-cancel" (click)="closeSolicitudModal()">Cancelar</button>
+                  <button nz-button nzType="primary" type="button" class="btn-save" (click)="saveSolicitud()" [disabled]="solicitudForm.invalid">
+                    Guardar solicitud
+                  </button>
+                </div>
+              </form>
+            </div>
+          </ng-template>
+      </nz-modal>
 
     </div>
   `,
@@ -314,16 +430,133 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
     .action-links a:hover { color: #1d4ed8; text-decoration: underline; }
     .action-links .divider { color: #cbd5e1; margin: 0 6px; font-weight: bold; }
 
+    .modal-description {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .modal-details {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 8px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .detail-item {
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .detail-item span {
+      color: #64748b;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .detail-item strong {
+      color: #0f172a;
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .detail-item-full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 8px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .field span {
+      font-size: 0.9rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cancel,
+    .btn-save {
+      height: 42px;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-weight: 700;
+    }
+
+    .btn-cancel {
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      background: #ffffff;
+    }
+
+    .btn-save {
+      background: #2563eb;
+      border: none;
+      color: #ffffff;
+    }
+
     /* --- RESPONSIVIDAD --- */
     @media (max-width: 768px) {
       .page-head { flex-direction: column; align-items: flex-start; }
       .btn-primary { width: 100%; justify-content: center; }
+      .modal-grid { grid-template-columns: 1fr; }
+      .details-grid { grid-template-columns: 1fr; }
       ::ng-deep .ant-table { overflow-x: auto; display: block; }
     }
   `]
 })
 export class VacacionesPageComponent {
-  readonly vacacionesMock = [
+  private readonly formBuilder = new FormBuilder();
+
+  solicitudModalVisible = false;
+  solicitudModalMode: VacationModalMode = 'create';
+
+  readonly solicitudForm = this.formBuilder.nonNullable.group({
+    empleado: ['', [Validators.required]],
+    rut: ['', [Validators.required]],
+    tipo: ['', [Validators.required]],
+    fechaInicio: ['', [Validators.required]],
+    fechaFin: ['', [Validators.required]],
+    dias: ['', [Validators.required]],
+    disponibles: ['', [Validators.required]],
+    solicitado: ['', [Validators.required]],
+    estado: ['Pendiente' as VacationRow['estado'], [Validators.required]],
+    motivo: ['', [Validators.required]],
+  });
+
+  vacacionesMock: VacationRow[] = [
     {
       empleado: 'Juan Pérez Rodríguez',
       rut: '12.345.678-9',
@@ -334,6 +567,8 @@ export class VacacionesPageComponent {
       disponibles: 10,
       solicitado: '09 abr 2026',
       estado: 'Aprobado'
+      ,
+      motivo: 'Vacaciones anuales solicitadas con anticipación'
     },
     {
       empleado: 'María González Silva',
@@ -345,6 +580,8 @@ export class VacacionesPageComponent {
       disponibles: 16,
       solicitado: '14 abr 2026',
       estado: 'Pendiente'
+      ,
+      motivo: 'Permiso médico breve'
     },
     {
       empleado: 'Carlos Muñoz López',
@@ -356,6 +593,8 @@ export class VacacionesPageComponent {
       disponibles: 20,
       solicitado: '13 abr 2026',
       estado: 'Pendiente'
+      ,
+      motivo: 'Vacaciones de invierno'
     },
     {
       empleado: 'Ana Martínez Torres',
@@ -367,6 +606,76 @@ export class VacacionesPageComponent {
       disponibles: 9,
       solicitado: '16 abr 2026',
       estado: 'Rechazado'
+      ,
+      motivo: 'Permiso personal sin disponibilidad'
     }
   ];
+
+  get solicitudModalTitle(): string {
+    return this.solicitudModalMode === 'view' ? 'Detalle de solicitud' : 'Nueva solicitud';
+  }
+
+  get isReadOnly(): boolean {
+    return this.solicitudModalMode === 'view';
+  }
+
+  openSolicitudModal(solicitud?: VacationRow, mode: VacationModalMode = 'create'): void {
+    this.solicitudModalMode = mode;
+    this.solicitudForm.reset({
+      empleado: solicitud?.empleado ?? '',
+      rut: solicitud?.rut ?? '',
+      tipo: solicitud?.tipo ?? '',
+      fechaInicio: solicitud?.fechaInicio ?? '',
+      fechaFin: solicitud?.fechaFin ?? '',
+      dias: String(solicitud?.dias ?? ''),
+      disponibles: String(solicitud?.disponibles ?? ''),
+      solicitado: solicitud?.solicitado ?? '',
+      estado: solicitud?.estado ?? 'Pendiente',
+      motivo: solicitud?.motivo ?? '',
+    });
+    this.solicitudModalVisible = true;
+  }
+
+  closeSolicitudModal(): void {
+    this.solicitudModalVisible = false;
+  }
+
+  saveSolicitud(): void {
+    if (this.solicitudForm.invalid) {
+      this.solicitudForm.markAllAsTouched();
+      return;
+    }
+
+    const solicitud = this.solicitudForm.getRawValue();
+
+    this.vacacionesMock = [
+      ...this.vacacionesMock,
+      {
+        empleado: solicitud.empleado,
+        rut: solicitud.rut,
+        tipo: solicitud.tipo as VacationRow['tipo'],
+        fechaInicio: solicitud.fechaInicio,
+        fechaFin: solicitud.fechaFin,
+        dias: Number(solicitud.dias),
+        disponibles: Number(solicitud.disponibles),
+        solicitado: solicitud.solicitado,
+        estado: solicitud.estado as VacationRow['estado'],
+        motivo: solicitud.motivo,
+      },
+    ];
+
+    this.closeSolicitudModal();
+  }
+
+  approveSolicitud(rut: string): void {
+    this.vacacionesMock = this.vacacionesMock.map((item) =>
+      item.rut === rut ? { ...item, estado: 'Aprobado' } : item
+    );
+  }
+
+  rejectSolicitud(rut: string): void {
+    this.vacacionesMock = this.vacacionesMock.map((item) =>
+      item.rut === rut ? { ...item, estado: 'Rechazado' } : item
+    );
+  }
 }

@@ -1,12 +1,37 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 // Módulos de NG-ZORRO
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+
+type EmployeeRow = {
+  nombre: string;
+  meta: string;
+  rut: string;
+  cargo: string;
+  departamento: string;
+  sueldo: string;
+  estado: 'Activo' | 'Vacaciones';
+};
+
+type EmployeeModalMode = 'create' | 'view' | 'edit';
+
+const emptyEmployee: EmployeeRow = {
+  nombre: '',
+  meta: '',
+  rut: '',
+  cargo: '',
+  departamento: '',
+  sueldo: '',
+  estado: 'Activo',
+};
 
 @Component({
   selector: 'app-empleados-page',
@@ -14,11 +39,14 @@ import { NzInputModule } from 'ng-zorro-antd/input';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     NzButtonModule,
     NzIconModule,
+    NzModalModule,
     NzTableModule,
     NzTagModule,
-    NzInputModule
+    NzInputModule,
+    NzSelectModule
   ],
   template: `
     <div class="page-container">
@@ -28,7 +56,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
           <h1 class="page-title">Empleados</h1>
           <p class="page-subtitle">Gestión completa de personal</p>
         </div>
-        <button nz-button nzType="primary" class="btn-primary">
+        <button nz-button nzType="primary" class="btn-primary" (click)="openEmployeeModal()">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           Nuevo Empleado
         </button>
@@ -101,17 +129,102 @@ import { NzInputModule } from 'ng-zorro-antd/input';
                   }
                 </td>
                 <td nzAlign="right" class="action-links">
-                  <a>Ver</a> 
+                  <a (click)="openEmployeeModal(emp, 'view')">Ver</a> 
                   <span class="divider">·</span> 
-                  <a>Editar</a> 
+                  <a (click)="openEmployeeModal(emp, 'edit')">Editar</a> 
                   <span class="divider">·</span> 
-                  <a class="danger">Borrar</a>
+                  <a class="danger" (click)="removeEmployee(emp.rut)">Borrar</a>
                 </td>
               </tr>
             }
           </tbody>
         </nz-table>
       </section>
+
+      <nz-modal
+        [(nzVisible)]="employeeModalVisible"
+        [nzTitle]="employeeModalTitle"
+        [nzFooter]="null"
+        [nzWidth]="720"
+        (nzOnCancel)="closeEmployeeModal()"
+      >
+          <ng-template nzModalContent>
+            <div class="modal-body-stack">
+              <div class="modal-details" [hidden]="employeeModalMode !== 'view'">
+                <p class="modal-description">Revisa la información del empleado.</p>
+                <div class="details-grid">
+                  <div class="detail-item"><span>Nombre completo</span><strong>{{ currentEmployee.nombre }}</strong></div>
+                  <div class="detail-item"><span>RUT</span><strong>{{ currentEmployee.rut }}</strong></div>
+                  <div class="detail-item"><span>Cargo</span><strong>{{ currentEmployee.cargo }}</strong></div>
+                  <div class="detail-item"><span>Departamento</span><strong>{{ currentEmployee.departamento }}</strong></div>
+                  <div class="detail-item"><span>Sueldo base</span><strong>{{ currentEmployee.sueldo }}</strong></div>
+                  <div class="detail-item"><span>Estado</span><strong>{{ currentEmployee.estado }}</strong></div>
+                  <div class="detail-item detail-item-full"><span>Referencia previsional</span><strong>{{ currentEmployee.meta }}</strong></div>
+                </div>
+                <div class="modal-actions">
+                  <button nz-button type="button" class="btn-cancel" (click)="closeEmployeeModal()">Cerrar</button>
+                </div>
+              </div>
+
+              <form [formGroup]="employeeForm" class="employee-modal-form" [hidden]="employeeModalMode === 'view'">
+            <p class="modal-description">Completa los datos del empleado.</p>
+            <div class="modal-summary" [hidden]="employeeModalMode === 'view'">
+              <span>Nombre actual:</span>
+              <strong>{{ employeeForm.get('nombre')?.value || 'Nuevo registro' }}</strong>
+            </div>
+            <div class="modal-grid">
+              <label class="field">
+                <span>Nombre completo</span>
+                <input nz-input formControlName="nombre" placeholder="Nombre y apellido" />
+              </label>
+
+              <label class="field">
+                <span>RUT</span>
+                <input nz-input formControlName="rut" placeholder="12.345.678-9" />
+              </label>
+
+              <label class="field">
+                <span>Cargo</span>
+                <input nz-input formControlName="cargo" placeholder="Cargo del empleado" />
+              </label>
+
+              <label class="field">
+                <span>Departamento</span>
+                <input nz-input formControlName="departamento" placeholder="Área o unidad" />
+              </label>
+
+              <label class="field">
+                <span>Sueldo base</span>
+                <input nz-input formControlName="sueldo" placeholder="$1.000.000" />
+              </label>
+
+              <label class="field">
+                <span>Estado</span>
+                <nz-select formControlName="estado" nzPlaceHolder="Selecciona el estado">
+                  @for (estado of estados; track estado) {
+                    <nz-option [nzValue]="estado" [nzLabel]="estado"></nz-option>
+                  }
+                </nz-select>
+              </label>
+
+              <label class="field field-full">
+                <span>Referencia previsional</span>
+                <input nz-input formControlName="meta" placeholder="AFP · Isapre / Fonasa" />
+              </label>
+            </div>
+
+            <div class="modal-actions">
+              <button nz-button type="button" class="btn-cancel" (click)="closeEmployeeModal()">
+                Cancelar
+              </button>
+              <button nz-button nzType="primary" type="button" class="btn-save" (click)="saveEmployee()" [disabled]="employeeForm.invalid">
+                {{ employeeModalMode === 'edit' ? 'Actualizar empleado' : 'Guardar empleado' }}
+              </button>
+            </div>
+          </form>
+          </div>
+        </ng-template>
+      </nz-modal>
 
     </div>
   `,
@@ -311,19 +424,161 @@ import { NzInputModule } from 'ng-zorro-antd/input';
     .action-links a.danger:hover { color: #b91c1c; }
     .action-links .divider { color: #cbd5e1; margin: 0 6px; font-weight: bold; }
 
+    .employee-modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 8px;
+    }
+
+    .modal-description {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .modal-body-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .modal-details {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 8px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .detail-item {
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .detail-item span {
+      color: #64748b;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .detail-item strong {
+      color: #0f172a;
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .detail-item-full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-summary {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .modal-summary strong {
+      color: #0f172a;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .field span {
+      font-size: 0.9rem;
+    }
+
+    .field-full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cancel,
+    .btn-save {
+      height: 42px;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-weight: 700;
+    }
+
+    .btn-cancel {
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      background: #ffffff;
+    }
+
+    .btn-save {
+      background: #2563eb;
+      border: none;
+      color: #ffffff;
+    }
+
     /* Responsividad */
     @media (max-width: 768px) {
       .page-head { flex-direction: column; align-items: flex-start; }
       .btn-primary { width: 100%; justify-content: center; }
       .table-actions { flex-direction: column; }
       .btn-filter { width: 100%; }
+      .modal-grid { grid-template-columns: 1fr; }
+      .details-grid { grid-template-columns: 1fr; }
       ::ng-deep .ant-table { overflow-x: auto; display: block; }
     }
   `]
 })
 export class EmpleadosPageComponent {
-  // Llevamos la data cruda a un arreglo para que NG-ZORRO pueda renderizarla con @for
-  readonly empleadosMock = [
+  private readonly formBuilder = new FormBuilder();
+
+  readonly estados: EmployeeRow['estado'][] = ['Activo', 'Vacaciones'];
+
+  employeeModalVisible = false;
+  employeeModalMode: EmployeeModalMode = 'create';
+  private editingRut: string | null = null;
+
+  readonly employeeForm = this.formBuilder.nonNullable.group({
+    nombre: ['', [Validators.required]],
+    meta: ['', [Validators.required]],
+    rut: ['', [Validators.required]],
+    cargo: ['', [Validators.required]],
+    departamento: ['', [Validators.required]],
+    sueldo: ['', [Validators.required]],
+    estado: ['Activo' as EmployeeRow['estado'], [Validators.required]],
+  });
+
+  empleadosMock: EmployeeRow[] = [
     {
       nombre: 'Juan Pérez Rodríguez',
       meta: 'Capital · Fonasa',
@@ -370,4 +625,74 @@ export class EmpleadosPageComponent {
       estado: 'Vacaciones'
     }
   ];
+
+  get employeeModalTitle(): string {
+    if (this.employeeModalMode === 'view') {
+      return 'Detalle de empleado';
+    }
+
+    return this.employeeModalMode === 'edit' ? 'Editar empleado' : 'Nuevo empleado';
+  }
+
+  get isReadOnly(): boolean {
+    return this.employeeModalMode === 'view';
+  }
+
+  get currentEmployee(): EmployeeRow {
+    return {
+      nombre: this.employeeForm.getRawValue().nombre || emptyEmployee.nombre,
+      meta: this.employeeForm.getRawValue().meta || emptyEmployee.meta,
+      rut: this.employeeForm.getRawValue().rut || emptyEmployee.rut,
+      cargo: this.employeeForm.getRawValue().cargo || emptyEmployee.cargo,
+      departamento: this.employeeForm.getRawValue().departamento || emptyEmployee.departamento,
+      sueldo: this.employeeForm.getRawValue().sueldo || emptyEmployee.sueldo,
+      estado: (this.employeeForm.getRawValue().estado || emptyEmployee.estado) as EmployeeRow['estado'],
+    };
+  }
+
+  openEmployeeModal(employee?: EmployeeRow, mode: EmployeeModalMode = 'create'): void {
+    this.employeeModalMode = mode;
+    this.editingRut = mode === 'edit' ? employee?.rut ?? null : null;
+    this.employeeForm.reset({
+      nombre: employee?.nombre ?? '',
+      meta: employee?.meta ?? '',
+      rut: employee?.rut ?? '',
+      cargo: employee?.cargo ?? '',
+      departamento: employee?.departamento ?? '',
+      sueldo: employee?.sueldo ?? '',
+      estado: employee?.estado ?? 'Activo',
+    });
+    this.employeeModalVisible = true;
+  }
+
+  closeEmployeeModal(): void {
+    this.employeeModalVisible = false;
+  }
+
+  saveEmployee(): void {
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      return;
+    }
+
+    const employee = this.employeeForm.getRawValue();
+    const updatedEmployee: EmployeeRow = {
+      ...employee,
+      estado: employee.estado as EmployeeRow['estado'],
+    };
+
+    if (this.employeeModalMode === 'edit' && this.editingRut) {
+      this.empleadosMock = this.empleadosMock.map((item) =>
+        item.rut === this.editingRut ? updatedEmployee : item
+      );
+    } else {
+      this.empleadosMock = [...this.empleadosMock, updatedEmployee];
+    }
+
+    this.closeEmployeeModal();
+  }
+
+  removeEmployee(rut: string): void {
+    this.empleadosMock = this.empleadosMock.filter((item) => item.rut !== rut);
+  }
 }
