@@ -19,7 +19,7 @@ import { AuthService } from '../../core/auth/auth.service';
             <h1 class="hero-title">Sistema de Remuneraciones</h1>
             <p class="hero-desc">
               Accede al panel centralizado para gestionar contratos, liquidaciones de sueldo, 
-              vacaciones y la configuración legal de tu empresa.
+              vacaciones y la configuración legal de tu empresa. Prueba Github Actions
             </p>
           </div>
 

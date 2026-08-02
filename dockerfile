@@ -1,21 +1,26 @@
-# Etapa 1: Compilación (Build)
-FROM node:20-alpine AS builder
+# ---------- STAGE 1: Build ----------
+FROM node:22-alpine AS build
+
 WORKDIR /app
 
-# Copiar archivos de dependencias e instalar (usando npm según tu terminal)
 COPY package.json package-lock.json ./
+
 RUN npm ci
 
-# Copiar el resto del código y construir para producción
 COPY . .
-# Nota: "plataforma-front" es el nombre de tu proyecto según los logs de tu terminal
-RUN npm run build --configuration production
 
-# Etapa 2: Servidor Web (Nginx)
-FROM nginx:alpine
-# Copiar los archivos compilados de Angular al servidor Nginx
-COPY --from=builder /app/dist/plataforma-front/browser /usr/share/nginx/html
+RUN npx ng build plataformaFront --configuration production
 
-# Exponer el puerto web por defecto
+# ---------- STAGE 2: Runtime ----------
+FROM nginx:1.27-alpine AS runtime
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=build /app/dist/plataformaFront /usr/share/nginx/html
+
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -q --spider http://localhost/ || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]
