@@ -9,7 +9,7 @@ RUN npm ci
 
 COPY . .
 
-RUN npx ng build Frontend-Proyecto --configuration production
+RUN npx ng build plataformaFront --configuration production
 
 # ---------- STAGE 2: Runtime ----------
 FROM nginx:1.27-alpine AS runtime
