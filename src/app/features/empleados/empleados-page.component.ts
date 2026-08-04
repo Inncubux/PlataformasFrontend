@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { inject} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
 
 // Módulos de NG-ZORRO
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -10,6 +13,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 type EmployeeRow = {
   nombre: string;
@@ -562,6 +566,8 @@ const emptyEmployee: EmployeeRow = {
 export class EmpleadosPageComponent {
   private readonly formBuilder = new FormBuilder();
 
+  private readonly http = inject(HttpClient);
+  private readonly message = inject(NzMessageService);
   readonly estados: EmployeeRow['estado'][] = ['Activo', 'Vacaciones'];
 
   employeeModalVisible = false;
@@ -670,27 +676,50 @@ export class EmpleadosPageComponent {
   }
 
   saveEmployee(): void {
-    if (this.employeeForm.invalid) {
-      this.employeeForm.markAllAsTouched();
-      return;
-    }
-
-    const employee = this.employeeForm.getRawValue();
-    const updatedEmployee: EmployeeRow = {
-      ...employee,
-      estado: employee.estado as EmployeeRow['estado'],
-    };
-
-    if (this.employeeModalMode === 'edit' && this.editingRut) {
-      this.empleadosMock = this.empleadosMock.map((item) =>
-        item.rut === this.editingRut ? updatedEmployee : item
-      );
-    } else {
-      this.empleadosMock = [...this.empleadosMock, updatedEmployee];
-    }
-
-    this.closeEmployeeModal();
+  if (this.employeeForm.invalid) {
+    this.employeeForm.markAllAsTouched();
+    return;
   }
+
+  const employeeData = this.employeeForm.getRawValue();
+
+  if (this.employeeModalMode === 'edit' && this.editingRut) {
+    // Aquí iría tu lógica de edición (PUT) al backend en el futuro
+    const updatedEmployee: EmployeeRow = {
+      ...employeeData,
+      estado: employeeData.estado as EmployeeRow['estado'],
+    };
+    this.empleadosMock = this.empleadosMock.map((item) =>
+      item.rut === this.editingRut ? updatedEmployee : item
+    );
+    this.closeEmployeeModal();
+    this.message.success('Empleado actualizado correctamente');
+    
+  } else {
+    // NUEVO: CREACIÓN DE EMPLEADO (POST AL BACKEND .NET)
+    // Reemplaza localhost:5271 por la URL exacta de tu consola .NET si cambia
+    this.http.post('http://192.168.100.149:5271/api/users/register', employeeData).subscribe({
+      next: (response) => {
+        console.log('Respuesta del servidor:', response);
+        
+        // 1. Actualizamos la tabla visualmente
+        const newEmployee: EmployeeRow = {
+          ...employeeData,
+          estado: employeeData.estado as EmployeeRow['estado'],
+        };
+        this.empleadosMock = [...this.empleadosMock, newEmployee];
+        
+        // 2. Cerramos el modal y mostramos éxito
+        this.closeEmployeeModal();
+        this.message.success('Empleado guardado en la base de datos');
+      },
+      error: (err) => {
+        console.error('Error al guardar:', err);
+        this.message.error('Hubo un problema al conectar con el servidor');
+      }
+    });
+  }
+}
 
   removeEmployee(rut: string): void {
     this.empleadosMock = this.empleadosMock.filter((item) => item.rut !== rut);
