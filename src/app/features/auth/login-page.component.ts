@@ -16,7 +16,7 @@ import { AuthService } from '../../core/auth/auth.service';
         <div class="auth-hero">
           <div>
             <p class="auth-kicker">Pyme SP</p>
-            <h1 class="hero-title">Sistema de Remuneraciones</h1>
+            <h1 class="hero-title">Sistema de Remuneraciones Y Prueba de github action</h1>
             <p class="hero-desc">
               Accede al panel centralizado para gestionar contratos, liquidaciones de sueldo, 
               vacaciones y la configuración legal de tu empresa. Prueba Github Actions parte 2
